@@ -257,15 +257,18 @@ const bubbles: Choreography = (col, row, t) => {
   return [handA, handB];
 };
 
-/** Every clock ticks like a second hand, staggered so ticks rain across the wall. */
+/** Clockwork: one hand ticks quickly, the other creeps the opposite way, staggered so ticks rain across the wall. */
 const metronome: Choreography = (col, row, t) => {
   // Diagonal cascade with a touch of per-clock jitter (0-0.4s)
   const phase = (col * 0.13 + row * 0.21 + (hash(col + row * 24) % 100) / 250) % 1;
   const tp = t + phase;
-  const tick = Math.floor(tp);
-  const p = Math.min(1, (tp - tick) / 0.15); // the snap takes 0.15s
-  const a = mod360((tick + easeInOutCubic(p)) * 6);
-  return [a, a];
+  // Big hand: quick mechanical ticks, 12 deg every half second
+  const tick = Math.floor(tp * 2);
+  const p = Math.min(1, (tp * 2 - tick) / 0.3); // the snap takes 0.15s
+  const handA = mod360((tick + easeInOutCubic(p)) * 12);
+  // Small hand: slow smooth counter-rotation, a third of the big hand's pace
+  const handB = mod360(-tp * 8);
+  return [handA, handB];
 };
 
 /** Two-source interference: line orientation tracks the difference of distances, so fringes sweep along hyperbolas. */

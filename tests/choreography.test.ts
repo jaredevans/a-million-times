@@ -109,9 +109,10 @@ describe('formula anchors', () => {
     expect(Math.round(bA) % 360).toBe(0);           // smooth vertical background current
     expect(Math.round(bB) % 360).toBe(180);
 
-    // Metronome ticks 6 deg per second; (0,0) has phase 0 (hash(0) = 0)
-    expect(metronome(0, 0, 10)).toEqual([60, 60]);    // resting on tick 10
-    expect(metronome(0, 0, 10.5)).toEqual([66, 66]);  // snap to tick 11 finished
+    // Metronome: big hand ticks 12 deg per half second, small hand drifts
+    // 8 deg/s the opposite way; (0,0) has phase 0 (hash(0) = 0)
+    expect(metronome(0, 0, 10)).toEqual([240, 280]);   // tick 20 at rest; -80 mod 360
+    expect(metronome(0, 0, 10.5)).toEqual([252, 276]); // tick 21 at rest; -84 mod 360
 
     // Moire: orientation follows the difference of distances to two sources
     expect(moire(0, 0, 0)[0]).toBeCloseTo(328.321, 2);

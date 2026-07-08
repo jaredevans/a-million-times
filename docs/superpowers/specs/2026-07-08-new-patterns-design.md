@@ -256,6 +256,13 @@ at all four corners, at all times), and rings are wave packets
 hands through the contour as they roll outward. Measured: max 8.9°/frame
 both hands, mean 101°/s, 0 events >30°. Corners verified closed in-browser.
 
+**Metronome redesign (user feedback: boring):** no longer a fused needle.
+One hand ticks quickly clockwise (12° every half-second, eased 0.15s
+snaps), the other rotates smoothly counterclockwise at 8°/s — opposing
+directions per the user's request, with the original stagger/jitter
+cascade retained. Both hands render identically, so it reads as fast
+ticking versus slow counter-drift. Measured: max 3.6°/frame, 0 events.
+
 ## Non-goals
 
 - No changes to the existing eight patterns beyond the ripple rename.
