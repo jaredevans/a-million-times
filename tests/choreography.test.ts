@@ -114,9 +114,9 @@ describe('formula anchors', () => {
     expect(metronome(0, 0, 10.5)).toEqual([66, 66]);  // snap to tick 11 finished
 
     // Moire: orientation follows the difference of distances to two sources
-    expect(moire(0, 0, 0)[0]).toBeCloseTo(306.4857, 2);
-    expect(moire(0, 0, 0)[1]).toBeCloseTo(126.4857, 2);
-    expect(moire(20, 3, 5)[0]).toBeCloseTo(309.9527, 2);
+    expect(moire(0, 0, 0)[0]).toBeCloseTo(328.321, 2);
+    expect(moire(0, 0, 0)[1]).toBeCloseTo(148.321, 2);
+    expect(moire(20, 3, 5)[0]).toBeCloseTo(176.8584, 2);
 
     // Kaleidoscope: 4-fold mirror. (20,2) is (3,2) mirrored across the vertical
     // axis (angle negated); (3,9) across the horizontal (angle -> 180 - a).

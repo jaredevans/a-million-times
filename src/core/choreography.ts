@@ -270,11 +270,16 @@ const metronome: Choreography = (col, row, t) => {
 
 /** Two-source interference: line orientation tracks the difference of distances, so fringes sweep along hyperbolas. */
 const moire: Choreography = (col, row, t) => {
-  const s1x = 8 + 2.5 * Math.sin(0.31 * t), s1y = 5.5 + 2 * Math.cos(0.23 * t);
-  const s2x = 15 + 2.5 * Math.sin(0.27 * t + 2), s2y = 5.5 + 2 * Math.cos(0.19 * t + 1);
+  // Sources orbit widely and out of phase, so the hyperbola family keeps reshaping
+  const s1x = 8 + 4.5 * Math.sin(0.7 * t), s1y = 5.5 + 3 * Math.cos(0.5 * t);
+  const s2x = 15 + 4.5 * Math.sin(0.6 * t + 2), s2y = 5.5 + 3 * Math.cos(0.45 * t + 1);
   const d1 = Math.hypot(col - s1x, row - s1y);
   const d2 = Math.hypot(col - s2x, row - s2y);
-  const a = mod360((d1 - d2) * 55 + t * 15);
+  // Fringe density breathes (27..63 deg/unit) so bands visibly merge and split
+  const k = 45 + 18 * Math.sin(0.35 * t);
+  // Sweep speed oscillates 15..65 deg/s (derivative of 40t + 71.4*sin(0.35t))
+  const sweep = t * 40 + Math.sin(t * 0.35) * 71.4;
+  const a = mod360((d1 - d2) * k + sweep);
   return [a, mod360(a + 180)];
 };
 
