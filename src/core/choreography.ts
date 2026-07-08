@@ -105,7 +105,7 @@ const cascade: Choreography = (_col, row, t) => {
 };
 
 /** Concentric rings that ripple outwards like a water drop. */
-const kaleidoscope: Choreography = (col, row, t) => {
+const ripple: Choreography = (col, row, t) => {
   // Flow field calculates the angle of the ripple slope at any point
   const flow = (c: number, r: number): number => {
     const dx = 11.5 - c;
@@ -257,9 +257,9 @@ const bubbles: Choreography = (col, row, t) => {
   return [handA, handB];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, kaleidoscope, earthquake, bubbles];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles];
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Kaleidoscope', 'Earthquake', 'Bubbles'];
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles'];
 
 let patternOverride: number | null = null;
 

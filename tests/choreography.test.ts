@@ -21,6 +21,10 @@ describe('catalog', () => {
     expect(PATTERN_NAMES).toHaveLength(CATALOG.length);
   });
 
+  it('labels the water-drop pattern Ripple', () => {
+    expect(PATTERN_NAMES[5]).toBe('Ripple');
+  });
+
   it('returns normalized finite angles across the grid and time range', () => {
     for (const piece of CATALOG) {
       for (let col = 0; col < 24; col += 3) {
@@ -72,7 +76,7 @@ describe('pickChoreography', () => {
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, kaleidoscope, earthquake, bubbles] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -87,13 +91,13 @@ describe('formula anchors', () => {
     const [cA, cB] = cascade(0, 0, 1);
     expect(cA).toBeCloseTo(9.85, 2);                // 180 + 130 + sin(1.5)*60
     expect(cB).toBeCloseTo(9.85, 2);
-    // Kaleidoscope hands now trace a 3D water ripple
-    const [ka, kb] = kaleidoscope(0, 0, 0);
+    // Ripple hands trace a 3D water wave
+    const [ka, kb] = ripple(0, 0, 0);
     expect(ka).toBeCloseTo(214, 0);                 // steeper outward slope
     expect(kb).toBeCloseTo(33, 0);                  // bends along the pronounced ripple curve
     // Different distances from center produce different ring poses
-    const [nearA] = kaleidoscope(12, 5, 5);
-    const [farA] = kaleidoscope(0, 0, 5);
+    const [nearA] = ripple(12, 5, 5);
+    const [farA] = ripple(0, 0, 5);
     expect(nearA).not.toBeCloseTo(farA, 0); // different rings = different angles
     
     expect(earthquake(0, 0, 0)).toEqual([0, 0]);    // violent shake momentarily snaps hands together
