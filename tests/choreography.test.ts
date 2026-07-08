@@ -13,8 +13,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has twelve pieces', () => {
-    expect(CATALOG).toHaveLength(12);
+  it('has thirteen pieces', () => {
+    expect(CATALOG).toHaveLength(13);
   });
 
   it('names every piece', () => {
@@ -51,7 +51,7 @@ describe('pickChoreography', () => {
     expect(pickChoreography(0)).toBe(CATALOG[2]);
     expect(pickChoreography(12345)).toBe(CATALOG[2]);
     setPatternOverride(null);
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 12 = 0
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 13 = 0
   });
 
   it('ignores out-of-range or non-integer overrides', () => {
@@ -70,13 +70,13 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(12);
+    expect(seen.size).toBe(13);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame, murmuration] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -128,11 +128,16 @@ describe('formula anchors', () => {
     expect(frame(11, 5, 0)[0]).toBeCloseTo(86.8661, 2);
     expect(frame(11, 5, 0)[1]).toBeCloseTo(266.8661, 2);
     expect(frame(23, 5, 0)[0]).toBeCloseTo(3.1339, 2);
+
+    // Murmuration: needles follow the flock's blended heading
+    expect(murmuration(12, 6, 3)[0]).toBeCloseTo(125.5828, 2);
+    expect(murmuration(12, 6, 3)[1]).toBeCloseTo(125.5828, 2);
+    expect(murmuration(2, 10, 20)[0]).toBeCloseTo(135.1201, 2);
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 12 = 0
-    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 12 = 7
-    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 12 = 1
+    expect(pickChoreography(0)).toBe(CATALOG[0]);  // hash(0) % 13 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[11]); // hash(1) % 13 = 11
+    expect(pickChoreography(4)).toBe(CATALOG[5]);  // hash(4) % 13 = 5
   });
 });

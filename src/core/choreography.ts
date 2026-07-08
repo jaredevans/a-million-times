@@ -306,9 +306,43 @@ const frame: Choreography = (col, row, t) => {
   return [a, mod360(a + 180)];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame];
+/** Five invisible birds on loosely-aligned Lissajous paths; needles point along the flock's blended heading. */
+const murmuration: Choreography = (col, row, t) => {
+  let vx = 0, vy = 0, total = 0, gx = 0, gy = 0;
+  for (let i = 0; i < 5; i++) {
+    const fx = 0.24 + (hash(i * 7) % 10) * 0.006;
+    const fy = 0.31 + (hash(i * 11) % 10) * 0.006;
+    const px = (hash(i * 13) % 100) / 100;
+    const py = (hash(i * 17) % 100) / 100;
+    const bx = 11.5 + 9 * Math.sin(fx * t + px);
+    const by = 5.5 + 4.5 * Math.sin(fy * t + py);
+    const hx = 9 * fx * Math.cos(fx * t + px);   // path velocity = heading
+    const hy = 4.5 * fy * Math.cos(fy * t + py);
+    const hm = Math.hypot(hx, hy);
+    if (hm === 0) continue;
+    gx += hx / hm;                    // global mean heading accumulator
+    gy += hy / hm;
+    const d = Math.hypot(col - bx, row - by);
+    const w = Math.exp(-d * d / 16); // influence radius ~4 clocks
+    vx += (w * hx) / hm;
+    vy += (w * hy) / hm;
+    total += w;
+  }
+  // Ambient field: the flock's mean heading with a gentle spatial wobble,
+  // so the far field leans where the flock flies and never opposes it.
+  const wobble = Math.sin(col * 0.4 + row * 0.3 + t * 0.7) * 20;
+  const baseA = mod360(angleToward(gx, gy) + wobble);
+  const bw = Math.max(0, 1 - total);
+  const baseRad = (baseA * Math.PI) / 180;
+  vx += bw * Math.sin(baseRad);
+  vy += bw * -Math.cos(baseRad);
+  const a = vx === 0 && vy === 0 ? baseA : angleToward(vx, vy);
+  return [a, a];
+};
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré', 'Kaleidoscope', 'Frame'];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame, murmuration];
+
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré', 'Kaleidoscope', 'Frame', 'Murmuration'];
 
 let patternOverride: number | null = null;
 
