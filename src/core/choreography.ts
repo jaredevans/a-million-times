@@ -260,6 +260,7 @@ export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Blo
 let patternOverride: number | null = null;
 
 export function setPatternOverride(index: number | null): void {
+  if (index !== null && !(Number.isInteger(index) && index >= 0 && index < CATALOG.length)) return;
   patternOverride = index;
 }
 

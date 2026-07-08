@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { angleToward, CATALOG, pickChoreography } from '../src/core/choreography';
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  angleToward, CATALOG, PATTERN_NAMES, pickChoreography, setPatternOverride,
+} from '../src/core/choreography';
 
 describe('angleToward', () => {
   it('maps cardinal grid directions to hand angles', () => {
@@ -11,8 +13,12 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has six pieces', () => {
+  it('has eight pieces', () => {
     expect(CATALOG).toHaveLength(8);
+  });
+
+  it('names every piece', () => {
+    expect(PATTERN_NAMES).toHaveLength(CATALOG.length);
   });
 
   it('returns normalized finite angles across the grid and time range', () => {
@@ -34,6 +40,24 @@ describe('catalog', () => {
 });
 
 describe('pickChoreography', () => {
+  afterEach(() => setPatternOverride(null));
+
+  it('honors the pattern override and reverts on null', () => {
+    setPatternOverride(2);
+    expect(pickChoreography(0)).toBe(CATALOG[2]);
+    expect(pickChoreography(12345)).toBe(CATALOG[2]);
+    setPatternOverride(null);
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 8 = 0
+  });
+
+  it('ignores out-of-range or non-integer overrides', () => {
+    setPatternOverride(2);
+    setPatternOverride(CATALOG.length);
+    setPatternOverride(-1);
+    setPatternOverride(1.5);
+    expect(pickChoreography(0)).toBe(CATALOG[2]);
+  });
+
   it('is deterministic per minute', () => {
     expect(pickChoreography(12345)).toBe(pickChoreography(12345));
     expect(pickChoreography(0)).toBe(pickChoreography(0));
@@ -50,11 +74,11 @@ describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
     const [wave, spiral, grass, bloom, cascade, kaleidoscope, earthquake, bubbles] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
-    // Spiral hands bend to follow the curve (they are not exactly 180° apart)
-    const [sA, sB] = spiral(11, 9, 0); 
-    const diff = Math.abs(sA - sB);
-    expect(diff).not.toBeCloseTo(180, 0); // hands bend, so not exactly opposed
-    
+    // Spiral hands bend to follow the curve (203° apart here, not 180°)
+    const [sA, sB] = spiral(11, 9, 0);
+    expect(sA).toBeCloseTo(101.31, 2);
+    expect(sB).toBeCloseTo(304.33, 2);
+
     const [gA, gB] = grass(0, 5, 0);
     expect(gA).toBeCloseTo(18, 0);                  // evaluates tangent flow slightly above center
     expect(gB).toBeCloseTo(202, 0);                 // evaluates tangent flow slightly below center

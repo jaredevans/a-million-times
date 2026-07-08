@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { interpolateHand } from '../src/core/angles';
 import { interludeAt } from '../src/core/interlude';
 import {
   COLS, DIGIT_BLOCK_COLS, DIGIT_BLOCK_ROWS, NEUTRAL_POSE, poseForTime, poseForTimeAt, ROWS,
 } from '../src/core/layout';
-import { choreographyPose, interpolatePose, poseAt } from '../src/core/timeline';
+import { choreographyPose, interpolatePose, poseAt, setFormat24h } from '../src/core/timeline';
 
 const at = (h: number, m: number, s: number, ms = 0): number =>
   new Date(2026, 0, 15, h, m, s, ms).getTime();
@@ -105,6 +105,37 @@ describe('poseAt', () => {
       0.5,
     );
     expect(poseAt(load, load)).toEqual(expected);
+  });
+});
+
+describe('12-hour format', () => {
+  const EARLY_LOAD = at(0, 20, 0); // before every "now" below: intro never active
+  afterEach(() => setFormat24h(true));
+
+  it('converts midnight and noon to 12 during the hold', () => {
+    setFormat24h(false);
+    expect(poseAt(at(0, 30, 5), EARLY_LOAD)).toEqual(poseForTime(12, 30, false));
+    expect(poseAt(at(12, 30, 5), EARLY_LOAD)).toEqual(poseForTime(12, 30, false));
+  });
+
+  it('drops the leading zero-hour digit below 10', () => {
+    setFormat24h(false);
+    expect(poseAt(at(21, 30, 5), EARLY_LOAD)).toEqual(poseForTime(9, 30, false));
+  });
+
+  it('formats the lookahead target across 12:59 -> 1:00', () => {
+    setFormat24h(false);
+    const now = at(12, 59, 55);
+    const expected = interpolatePose(
+      choreographyPose(minuteIndexOf(now), 38),
+      poseForTime(1, 0, false),
+      0.5,
+    );
+    expect(poseAt(now, EARLY_LOAD)).toEqual(expected);
+  });
+
+  it('keeps 24h zero-padded hours by default', () => {
+    expect(poseAt(at(9, 30, 5), EARLY_LOAD)).toEqual(poseForTime(9, 30, true));
   });
 });
 

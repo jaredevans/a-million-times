@@ -70,7 +70,8 @@ function getFormattedHour(date: Date): number {
   return h % 12 || 12;
 }
 
-/** The whole display is a pure function of wall-clock time. */
+/** The whole display is a pure function of wall-clock time and the two
+ * explicit user settings: time format (setFormat24h) and pattern override. */
 export function poseAt(nowMs: number, loadMs: number): GridPose {
   const now = new Date(nowMs);
   const sec = now.getSeconds() + now.getMilliseconds() / 1000;
