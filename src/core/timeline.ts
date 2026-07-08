@@ -1,6 +1,9 @@
 import { interpolateHand } from './angles';
 import { pickChoreography } from './choreography';
-import { COLS, NEUTRAL_POSE, poseForTime, ROWS } from './layout';
+import { interludeAt, type Interlude } from './interlude';
+import {
+  COLS, DIGIT_BLOCK_COLS, DIGIT_BLOCK_ROWS, NEUTRAL_POSE, poseForTime, poseForTimeAt, ROWS,
+} from './layout';
 import type { GridPose, HandAngles } from './types';
 
 export const HOLD_S = 12;
@@ -28,6 +31,28 @@ export function choreographyPose(minuteIndex: number, t: number): GridPose {
   return pose;
 }
 
+/** Overlay the time block on the choreography: block cells blend/hold, all others pass through. */
+function composeInterlude(
+  base: GridPose,
+  il: Interlude,
+  hours24: number,
+  minutes: number,
+): GridPose {
+  const block = poseForTimeAt(hours24, minutes, il.originCol, il.originRow);
+  return base.map((cell, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const inBlock =
+      col >= il.originCol && col < il.originCol + DIGIT_BLOCK_COLS &&
+      row >= il.originRow && row < il.originRow + DIGIT_BLOCK_ROWS;
+    if (!inBlock) return cell;
+    if (il.phase === 'hold') return block[i];
+    const [from, to] = il.phase === 'in' ? [cell, block[i]] : [block[i], cell];
+    if (il.p === 0) return from;
+    return [interpolateHand(from[0], to[0], il.p), interpolateHand(from[1], to[1], il.p)] as const;
+  });
+}
+
 /** The whole display is a pure function of wall-clock time. */
 export function poseAt(nowMs: number, loadMs: number): GridPose {
   const now = new Date(nowMs);
@@ -46,6 +71,10 @@ export function poseAt(nowMs: number, loadMs: number): GridPose {
   let current: GridPose;
   if (sec >= HOLD_S + DISSOLVE_S) {
     current = choreographyPose(minuteIndex, sec - HOLD_S);
+    const il = interludeAt(sec, minuteIndex);
+    if (il) {
+      current = composeInterlude(current, il, now.getHours(), now.getMinutes());
+    }
   } else if (sec >= HOLD_S) {
     current = interpolatePose(
       digits,
