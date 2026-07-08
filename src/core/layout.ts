@@ -21,21 +21,23 @@ const GLYPH_ROWS = 6;
 
 export const NEUTRAL_POSE: GridPose = Array.from({ length: CLOCK_COUNT }, () => NEUTRAL);
 
-/** 12-hour digit slots [H1, H2, M1, M2]; null = blank leading digit. */
-export function timeToDigits(hours24: number, minutes: number): readonly [number | null, number, number, number] {
-  const h12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
-  return [h12 >= 10 ? 1 : null, h12 % 10, Math.floor(minutes / 10), minutes % 10];
+/** Digit slots [H1, H2, M1, M2]; null = blank leading digit if not zero-padded. */
+export function timeToDigits(hour: number, minutes: number, padZero: boolean): readonly [number | null, number, number, number] {
+  const h1 = Math.floor(hour / 10);
+  const leading = h1 === 0 && !padZero ? null : h1;
+  return [leading, hour % 10, Math.floor(minutes / 10), minutes % 10];
 }
 
 /** Full-grid pose: neutral everywhere, the time block stamped at the given origin. */
 export function poseForTimeAt(
-  hours24: number,
+  hour: number,
   minutes: number,
+  padZero: boolean,
   originCol: number,
   originRow: number,
 ): GridPose {
   const pose: HandAngles[] = Array.from({ length: CLOCK_COUNT }, () => NEUTRAL);
-  timeToDigits(hours24, minutes).forEach((digit, slot) => {
+  timeToDigits(hour, minutes, padZero).forEach((digit, slot) => {
     const glyph = digit === null ? BLANK_GLYPH : DIGIT_GLYPHS[digit];
     for (let gr = 0; gr < GLYPH_ROWS; gr++) {
       for (let gc = 0; gc < GLYPH_COLS; gc++) {
@@ -47,6 +49,6 @@ export function poseForTimeAt(
   return pose;
 }
 
-export function poseForTime(hours24: number, minutes: number): GridPose {
-  return poseForTimeAt(hours24, minutes, DIGIT_COLS[0], DIGIT_ROW);
+export function poseForTime(hour: number, minutes: number, padZero: boolean): GridPose {
+  return poseForTimeAt(hour, minutes, padZero, DIGIT_COLS[0], DIGIT_ROW);
 }

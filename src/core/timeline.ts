@@ -35,10 +35,11 @@ export function choreographyPose(minuteIndex: number, t: number): GridPose {
 function composeInterlude(
   base: GridPose,
   il: Interlude,
-  hours24: number,
+  hour: number,
   minutes: number,
+  padZero: boolean,
 ): GridPose {
-  const block = poseForTimeAt(hours24, minutes, il.originCol, il.originRow);
+  const block = poseForTimeAt(hour, minutes, padZero, il.originCol, il.originRow);
   return base.map((cell, i) => {
     const col = i % COLS;
     const row = Math.floor(i / COLS);
@@ -53,16 +54,35 @@ function composeInterlude(
   });
 }
 
+let format24h = true;
+
+export function setFormat24h(value: boolean): void {
+  format24h = value;
+}
+
+export function getFormat24h(): boolean {
+  return format24h;
+}
+
+function getFormattedHour(date: Date): number {
+  const h = date.getHours();
+  if (format24h) return h;
+  return h % 12 || 12;
+}
+
 /** The whole display is a pure function of wall-clock time. */
 export function poseAt(nowMs: number, loadMs: number): GridPose {
   const now = new Date(nowMs);
   const sec = now.getSeconds() + now.getMilliseconds() / 1000;
   const minuteIndex = Math.floor(nowMs / 60_000);
-  const digits = poseForTime(now.getHours(), now.getMinutes());
+  const currentHour = getFormattedHour(now);
+  const is24 = getFormat24h();
+  const digits = poseForTime(currentHour, now.getMinutes(), is24);
 
   if (sec >= TRANSITION_START_S) {
     const next = new Date(nowMs + 60_000);
-    const target = poseForTime(next.getHours(), next.getMinutes());
+    const nextHour = getFormattedHour(next);
+    const target = poseForTime(nextHour, next.getMinutes(), is24);
     const start = choreographyPose(minuteIndex, TRANSITION_START_S - HOLD_S);
     const p = (sec - TRANSITION_START_S) / TRANSITION_DURATION_S;
     return p === 0 ? start : interpolatePose(start, target, p);
@@ -73,7 +93,7 @@ export function poseAt(nowMs: number, loadMs: number): GridPose {
     current = choreographyPose(minuteIndex, sec - HOLD_S);
     const il = interludeAt(sec, minuteIndex);
     if (il) {
-      current = composeInterlude(current, il, now.getHours(), now.getMinutes());
+      current = composeInterlude(current, il, currentHour, now.getMinutes(), is24);
     }
   } else if (sec >= HOLD_S) {
     current = interpolatePose(

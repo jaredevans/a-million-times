@@ -11,8 +11,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has five pieces', () => {
-    expect(CATALOG).toHaveLength(5);
+  it('has six pieces', () => {
+    expect(CATALOG).toHaveLength(8);
   });
 
   it('returns normalized finite angles across the grid and time range', () => {
@@ -42,24 +42,46 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(5);
+    expect(seen.size).toBe(8);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, unison, scissors, bloom, cascade] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, kaleidoscope, earthquake, bubbles] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
-    expect(unison(0, 0, 1)).toEqual([12, 192]);     // t * 12, opposed hands
-    expect(scissors(0, 0, 1)).toEqual([120, 60]);   // 90 +/- t * 30
+    // Spiral hands bend to follow the curve (they are not exactly 180° apart)
+    const [sA, sB] = spiral(11, 9, 0); 
+    const diff = Math.abs(sA - sB);
+    expect(diff).not.toBeCloseTo(180, 0); // hands bend, so not exactly opposed
+    
+    const [gA, gB] = grass(0, 5, 0);
+    expect(gA).toBeCloseTo(18, 0);                  // evaluates tangent flow slightly above center
+    expect(gB).toBeCloseTo(202, 0);                 // evaluates tangent flow slightly below center
     expect(bloom(11, 9, 0)).toEqual([90, 270]);     // attractor at (11.5, 9) is due east
     expect(cascade(0, 5, 0)).toEqual([180, 180]);   // row not yet started
-    expect(cascade(0, 0, 1)).toEqual([220, 220]);   // 180 + t * 40
+    const [cA, cB] = cascade(0, 0, 1);
+    expect(cA).toBeCloseTo(9.85, 2);                // 180 + 130 + sin(1.5)*60
+    expect(cB).toBeCloseTo(9.85, 2);
+    // Kaleidoscope hands now trace a 3D water ripple
+    const [ka, kb] = kaleidoscope(0, 0, 0);
+    expect(ka).toBeCloseTo(214, 0);                 // steeper outward slope
+    expect(kb).toBeCloseTo(33, 0);                  // bends along the pronounced ripple curve
+    // Different distances from center produce different ring poses
+    const [nearA] = kaleidoscope(12, 5, 5);
+    const [farA] = kaleidoscope(0, 0, 5);
+    expect(nearA).not.toBeCloseTo(farA, 0); // different rings = different angles
+    
+    expect(earthquake(0, 0, 0)).toEqual([0, 0]);    // violent shake momentarily snaps hands together
+    
+    const [bA, bB] = bubbles(0, 0, 0);
+    expect(Math.round(bA) % 360).toBe(0);           // smooth vertical background current
+    expect(Math.round(bB) % 360).toBe(180);
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) = 0
-    expect(pickChoreography(1)).toBe(CATALOG[0]); // hash(1) % 5 = 0
-    expect(pickChoreography(7)).toBe(CATALOG[3]); // hash(7) % 5 = 3
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 8 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 8 = 7
+    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 8 = 1
   });
 });
