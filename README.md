@@ -4,9 +4,7 @@ A web recreation of [*A Million Times*](https://clockforward.com/humans-since-19
 
 This version renders **288 clocks** (a 24 × 12 grid) to a single HTML canvas. Every clock has two independently-driven hands; together they draw the digits of the time, dissolve into a choreographed pattern, and reassemble on the next minute.
 
-[![Preview of the clock wall — sped up 2×](amilliontimes.gif)](https://youtu.be/9Nw4haPRsE0)
-
-*Preview above is sped up 2× and downscaled. ▶ [Watch at full quality on YouTube](https://youtu.be/9Nw4haPRsE0).*
+▶ [Watch at full quality on YouTube](https://youtu.be/9Nw4haPRsE0).*
 
 ## The idea
 
