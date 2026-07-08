@@ -231,6 +231,19 @@ source of truth:
   and rejected). Measured: mean → 71°/s (~4x), snap profile unchanged
   (8 events, max 53°). Anchor pins updated in tests accordingly.
 
+**Bent hands (user feedback):** moiré, kaleidoscope, and frame now bend
+their hands independently spiral-style — hand A points along the flow
+field, hand B re-samples it 0.8 units back along the stroke and flips
+180° — so adjacent clocks chain into curved strokes instead of straight
+segments. Two seam fixes were required: kaleidoscope bends in folded
+quadrant space and mirrors both hands afterward (per-cell reflections keep
+hand B continuous in time and symmetry exact), and frame blends its edge
+tangent over a ~0.9-unit wedge at the diagonals (rounded corners), making
+the field spatially continuous. Measured (both-hand metric): moiré max
+19°/frame 0 events >30°; frame max 12.8° 0 events; kaleidoscope 48 events
+— in family with the user's spiral (41) and ripple (48) by the same
+metric. Hand-A formulas unchanged; hand-B anchors re-pinned.
+
 ## Non-goals
 
 - No changes to the existing eight patterns beyond the ripple rename.

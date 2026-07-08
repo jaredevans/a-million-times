@@ -273,47 +273,81 @@ const moire: Choreography = (col, row, t) => {
   // Sources orbit widely and out of phase, so the hyperbola family keeps reshaping
   const s1x = 8 + 4.5 * Math.sin(0.7 * t), s1y = 5.5 + 3 * Math.cos(0.5 * t);
   const s2x = 15 + 4.5 * Math.sin(0.6 * t + 2), s2y = 5.5 + 3 * Math.cos(0.45 * t + 1);
-  const d1 = Math.hypot(col - s1x, row - s1y);
-  const d2 = Math.hypot(col - s2x, row - s2y);
   // Fringe density breathes (27..63 deg/unit) so bands visibly merge and split
   const k = 45 + 18 * Math.sin(0.35 * t);
   // Sweep speed oscillates 15..65 deg/s (derivative of 40t + 71.4*sin(0.35t))
   const sweep = t * 40 + Math.sin(t * 0.35) * 71.4;
-  const a = mod360((d1 - d2) * k + sweep);
-  return [a, mod360(a + 180)];
+
+  const flow = (c: number, r: number): number => {
+    const d1 = Math.hypot(c - s1x, r - s1y);
+    const d2 = Math.hypot(c - s2x, r - s2y);
+    return mod360((d1 - d2) * k + sweep);
+  };
+
+  // Hand A points along the fringe; hand B re-samples the field a step back
+  // along the stroke so the hands bend with the hyperbola's curvature
+  const handA = flow(col, row);
+  const radA = handA * Math.PI / 180;
+  const handB = mod360(flow(col - 0.8 * Math.sin(radA), row + 0.8 * Math.cos(radA)) + 180);
+  return [handA, handB];
 };
 
 /** A vortex orbiting one quadrant, mirrored 4-fold into true kaleidoscope symmetry. */
 const kaleidoscope: Choreography = (col, row, t) => {
-  const mx = col <= 11.5 ? col : 23 - col;
-  const my = row <= 5.5 ? row : 11 - row;
   const cx = 5.75 + 3 * Math.sin(0.4 * t);   // vortex orbits inside the quadrant
   const cy = 2.75 + 1.6 * Math.cos(0.55 * t);
-  const dx = cx - mx, dy = cy - my;
-  const dist = Math.hypot(dx, dy);
   // Arms coil and uncoil deeply, straightening to radial spokes before recoiling
   const twist = 14 + 14 * Math.sin(0.6 * t);
-  // A ripple radiates through the mandala while the spin oscillates 10..80 deg/s
-  const wave = Math.sin(dist * 1.2 - t * 3) * 25;
   const spin = t * 45 + Math.sin(t * 0.4) * 87.5;
-  let a = mod360(angleToward(dx, dy) + 90 + dist * twist + wave + spin);
-  if (col > 11.5) a = mod360(-a);       // mirror across the vertical axis
-  if (row > 5.5) a = mod360(180 - a);   // mirror across the horizontal axis
-  return [a, mod360(a + 180)];
+
+  // Unmirrored vortex field, smooth everywhere in quadrant space
+  const field = (c: number, r: number): number => {
+    const dx = cx - c, dy = cy - r;
+    const dist = Math.hypot(dx, dy);
+    // A ripple radiates through the mandala while the spin oscillates 10..80 deg/s
+    const wave = Math.sin(dist * 1.2 - t * 3) * 25;
+    return mod360(angleToward(dx, dy) + 90 + dist * twist + wave + spin);
+  };
+
+  // Fold the cell into the quadrant, bend the hands there (hand B re-samples
+  // the smooth field a step back along the stroke), then mirror BOTH hands
+  // back. The reflections are fixed per cell, so the hands never jump when a
+  // back-step would cross a fold seam, and the 4-fold symmetry stays exact.
+  const mx = col <= 11.5 ? col : 23 - col;
+  const my = row <= 5.5 ? row : 11 - row;
+  const aQ = field(mx, my);
+  const radA = aQ * Math.PI / 180;
+  const bQ = mod360(field(mx - 0.8 * Math.sin(radA), my + 0.8 * Math.cos(radA)) + 180);
+  let handA = aQ, handB = bQ;
+  if (col > 11.5) { handA = mod360(-handA); handB = mod360(-handB); }   // vertical mirror
+  if (row > 5.5) { handA = mod360(180 - handA); handB = mod360(180 - handB); } // horizontal mirror
+  return [handA, handB];
 };
 
 /** Expanding concentric rectangles: rings sweep outward, aligning cells to the frame edge as they pass. */
 const frame: Choreography = (col, row, t) => {
-  const dx = col - 11.5, dy = row - 5.5;
-  const cheb = Math.max(Math.abs(dx), Math.abs(dy));
-  const edge = Math.abs(dx) > Math.abs(dy) ? 0 : 90;
   const SPEED = 3.5, GAP = 6; // ring every ~1.7s, ~2 rings visible
-  const m = ((cheb - t * SPEED) % GAP + GAP) % GAP;
-  const ringDist = Math.min(m, GAP - m);
-  const p = easeInOutCubic(Math.exp(-ringDist * ringDist * 1.2));
-  const shortDiff = mod360(edge - 45 + 90) % 180 - 90; // +/-45 by construction
-  const a = mod360(45 + shortDiff * p);
-  return [a, mod360(a + 180)];
+
+  const flow = (c: number, r: number): number => {
+    const dx = c - 11.5, dy = r - 5.5;
+    const cheb = Math.max(Math.abs(dx), Math.abs(dy));
+    // Rectangle-edge tangent (0 on side flanks, 90 top/bottom), blended over a
+    // ~0.9-unit wedge at the diagonals so the field has rounded corners and no
+    // spatial jump for the bent hands to trip on
+    const u = Math.max(-1, Math.min(1, (Math.abs(dx) - Math.abs(dy)) / 0.9));
+    const edge = 45 - 45 * u;
+    const m = ((cheb - t * SPEED) % GAP + GAP) % GAP;
+    const ringDist = Math.min(m, GAP - m);
+    const p = easeInOutCubic(Math.exp(-ringDist * ringDist * 1.2));
+    return mod360(45 + (edge - 45) * p);
+  };
+
+  // Hand B re-samples the field a step back along the stroke, so clocks at
+  // ring transitions and rectangle corners bend instead of creasing
+  const handA = flow(col, row);
+  const radA = handA * Math.PI / 180;
+  const handB = mod360(flow(col - 0.8 * Math.sin(radA), row + 0.8 * Math.cos(radA)) + 180);
+  return [handA, handB];
 };
 
 /** Five invisible birds on loosely-aligned Lissajous paths; needles point along the flock's blended heading. */

@@ -115,22 +115,22 @@ describe('formula anchors', () => {
 
     // Moire: orientation follows the difference of distances to two sources
     expect(moire(0, 0, 0)[0]).toBeCloseTo(328.321, 2);
-    expect(moire(0, 0, 0)[1]).toBeCloseTo(148.321, 2);
+    expect(moire(0, 0, 0)[1]).toBeCloseTo(141.253, 2); // bends along the hyperbola, not A+180
     expect(moire(20, 3, 5)[0]).toBeCloseTo(176.8584, 2);
 
     // Kaleidoscope: 4-fold mirror. (20,2) is (3,2) mirrored across the vertical
     // axis (angle negated); (3,9) across the horizontal (angle -> 180 - a).
     expect(kaleidoscope(3, 2, 7)[0]).toBeCloseTo(181.1255, 2);
-    expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(1.1255, 2);
+    expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(13.8836, 2); // bends along the arm, not A+180
     expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(178.8745, 2); // 360 - 181.1255
     expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(358.8745, 2);  // 180 - 181.1255 (mod 360)
     expect(kaleidoscope(20, 9, 7)[0]).toBeCloseTo(1.1255, 2);   // both mirrors compose to 180 + a
 
-    // Frame: at t=0 a ring sits at the center; (11,5) is on a top/bottom edge
-    // (rotates toward 90 deg), (23,5) on a side edge (rotates toward 0), both
-    // 0.5 from the ring so they share the same blend amount, mirrored about 45.
-    expect(frame(11, 5, 0)[0]).toBeCloseTo(86.8661, 2);
-    expect(frame(11, 5, 0)[1]).toBeCloseTo(266.8661, 2);
+    // Frame: (11,5) sits exactly on the center diagonal, where the rounded
+    // corner blends the edge tangent to 45 (hand A stays diagonal; hand B
+    // bends around the corner); (23,5) is on a side edge, 0.5 from a ring.
+    expect(frame(11, 5, 0)[0]).toBeCloseTo(45, 2);
+    expect(frame(11, 5, 0)[1]).toBeCloseTo(221.9823, 2);
     expect(frame(23, 5, 0)[0]).toBeCloseTo(3.1339, 2);
 
     // Murmuration: needles follow the flock's blended heading
