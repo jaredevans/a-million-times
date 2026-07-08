@@ -189,6 +189,10 @@ const murmuration: Choreography = (col, row, t) => {
 - Pattern bar: add `flex-wrap: wrap`, `justify-content: center`, and
   `max-width: calc(100vw - 32px)` so 15 buttons (12H + Auto + 13 patterns)
   never overflow narrow windows.
+- Centering changed from `left: 50% + translateX(-50%)` to inset centering
+  (`left/right: 0; width: fit-content; margin-inline: auto`): the transform
+  idiom caps a fixed element's shrink-to-fit width at half the viewport,
+  which made flex-wrap stack the buttons into a half-width column.
 - No other UI changes; buttons are generated from `PATTERN_NAMES`.
 
 ## Testing

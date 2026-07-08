@@ -21,8 +21,11 @@ describe('catalog', () => {
     expect(PATTERN_NAMES).toHaveLength(CATALOG.length);
   });
 
-  it('labels the water-drop pattern Ripple', () => {
-    expect(PATTERN_NAMES[5]).toBe('Ripple');
+  it('pins every pattern label in order', () => {
+    expect(PATTERN_NAMES).toEqual([
+      'Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles',
+      'Metronome', 'Moiré', 'Kaleidoscope', 'Frame', 'Murmuration',
+    ]);
   });
 
   it('returns normalized finite angles across the grid and time range', () => {
@@ -92,9 +95,9 @@ describe('formula anchors', () => {
     expect(cA).toBeCloseTo(9.85, 2);                // 180 + 130 + sin(1.5)*60
     expect(cB).toBeCloseTo(9.85, 2);
     // Ripple hands trace a 3D water wave
-    const [ka, kb] = ripple(0, 0, 0);
-    expect(ka).toBeCloseTo(214, 0);                 // steeper outward slope
-    expect(kb).toBeCloseTo(33, 0);                  // bends along the pronounced ripple curve
+    const [rA, rB] = ripple(0, 0, 0);
+    expect(rA).toBeCloseTo(214, 0);                 // steeper outward slope
+    expect(rB).toBeCloseTo(33, 0);                  // bends along the pronounced ripple curve
     // Different distances from center produce different ring poses
     const [nearA] = ripple(12, 5, 5);
     const [farA] = ripple(0, 0, 5);
@@ -121,6 +124,7 @@ describe('formula anchors', () => {
     expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(146.1804, 2);
     expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(33.8196, 2);  // 360 - 326.1804
     expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(213.8196, 2);  // 180 - 326.1804 (mod 360)
+    expect(kaleidoscope(20, 9, 7)[0]).toBeCloseTo(146.1804, 2); // both mirrors compose to 180 + a
 
     // Frame: at t=0 a ring sits at the center; (11,5) is on a top/bottom edge
     // (rotates toward 90 deg), (23,5) on a side edge (rotates toward 0), both

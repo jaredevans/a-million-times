@@ -320,7 +320,7 @@ const murmuration: Choreography = (col, row, t) => {
     const hy = 4.5 * fy * Math.cos(fy * t + py);
     const hm = Math.hypot(hx, hy);
     if (hm === 0) continue;
-    gx += hx / hm;                    // global mean heading accumulator
+    gx += hx / hm;                    // summed unit headings (direction of the flock mean)
     gy += hy / hm;
     const d = Math.hypot(col - bx, row - by);
     const w = Math.exp(-d * d / 16); // influence radius ~4 clocks
