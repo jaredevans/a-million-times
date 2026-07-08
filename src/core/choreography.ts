@@ -268,9 +268,19 @@ const metronome: Choreography = (col, row, t) => {
   return [a, a];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome];
+/** Two-source interference: line orientation tracks the difference of distances, so fringes sweep along hyperbolas. */
+const moire: Choreography = (col, row, t) => {
+  const s1x = 8 + 2.5 * Math.sin(0.31 * t), s1y = 5.5 + 2 * Math.cos(0.23 * t);
+  const s2x = 15 + 2.5 * Math.sin(0.27 * t + 2), s2y = 5.5 + 2 * Math.cos(0.19 * t + 1);
+  const d1 = Math.hypot(col - s1x, row - s1y);
+  const d2 = Math.hypot(col - s2x, row - s2y);
+  const a = mod360((d1 - d2) * 55 + t * 15);
+  return [a, mod360(a + 180)];
+};
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome'];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire];
+
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré'];
 
 let patternOverride: number | null = null;
 

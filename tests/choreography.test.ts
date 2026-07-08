@@ -13,8 +13,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has nine pieces', () => {
-    expect(CATALOG).toHaveLength(9);
+  it('has ten pieces', () => {
+    expect(CATALOG).toHaveLength(10);
   });
 
   it('names every piece', () => {
@@ -51,7 +51,7 @@ describe('pickChoreography', () => {
     expect(pickChoreography(0)).toBe(CATALOG[2]);
     expect(pickChoreography(12345)).toBe(CATALOG[2]);
     setPatternOverride(null);
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 8 = 0
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 10 = 0
   });
 
   it('ignores out-of-range or non-integer overrides', () => {
@@ -70,13 +70,13 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(9);
+    expect(seen.size).toBe(10);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -109,11 +109,16 @@ describe('formula anchors', () => {
     // Metronome ticks 6 deg per second; (0,0) has phase 0 (hash(0) = 0)
     expect(metronome(0, 0, 10)).toEqual([60, 60]);    // resting on tick 10
     expect(metronome(0, 0, 10.5)).toEqual([66, 66]);  // snap to tick 11 finished
+
+    // Moire: orientation follows the difference of distances to two sources
+    expect(moire(0, 0, 0)[0]).toBeCloseTo(306.4857, 2);
+    expect(moire(0, 0, 0)[1]).toBeCloseTo(126.4857, 2);
+    expect(moire(20, 3, 5)[0]).toBeCloseTo(309.9527, 2);
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 9 = 0
-    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 9 = 7
-    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 9 = 1
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 10 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[5]); // hash(1) % 10 = 5
+    expect(pickChoreography(4)).toBe(CATALOG[5]); // hash(4) % 10 = 5
   });
 });
