@@ -16,7 +16,7 @@ const GLYPH_ROWS = 6;
 export const NEUTRAL_POSE: GridPose = Array.from({ length: CLOCK_COUNT }, () => NEUTRAL);
 
 /** 12-hour digit slots [H1, H2, M1, M2]; null = blank leading digit. */
-export function timeToDigits(hours24: number, minutes: number): (number | null)[] {
+export function timeToDigits(hours24: number, minutes: number): readonly [number | null, number, number, number] {
   const h12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
   return [h12 >= 10 ? 1 : null, h12 % 10, Math.floor(minutes / 10), minutes % 10];
 }

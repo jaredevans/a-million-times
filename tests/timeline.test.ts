@@ -47,4 +47,17 @@ describe('poseAt', () => {
     const pose = poseAt(load, load);
     expect(pose[0][0]).toBeCloseTo(45, 10);
   });
+
+  it('sweeps a changing digit cell through its eased midpoint', () => {
+    // 10:30 -> 10:31: minute-units slot at index 3*24+18 changes GLYPH_0[0]=[90,180] -> NEUTRAL=[225,225]
+    const pose = poseAt(at(10, 30, 55), at(10, 20, 0));
+    expect(pose[90][0]).toBeCloseTo(337.5, 10); // 90 + (mod360(135)+360)*0.5
+    expect(pose[90][1]).toBeCloseTo(22.5, 10);  // mod360(180 + (mod360(45)+360)*0.5)
+  });
+
+  it('runs the intro when loaded at exactly the 47s cutoff', () => {
+    const load = at(10, 30, 47);
+    const pose = poseAt(load + 1500, load);
+    expect(pose[0][0]).toBeCloseTo(45, 10); // neutral clock halfway through intro sweep
+  });
 });

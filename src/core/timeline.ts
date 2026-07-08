@@ -5,7 +5,7 @@ import type { GridPose } from './types';
 export const TRANSITION_START_S = 50;
 export const TRANSITION_DURATION_S = 10;
 export const INTRO_MS = 3000;
-export const INTRO_CUTOFF_S = 47;
+export const INTRO_CUTOFF_S = TRANSITION_START_S - INTRO_MS / 1000;
 
 export function interpolatePose(from: GridPose, to: GridPose, p: number): GridPose {
   return from.map(
