@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIGIT_GLYPHS, NEUTRAL } from '../src/core/font';
 import {
-  CLOCK_COUNT, COLS, DIGIT_COLS, DIGIT_ROW, NEUTRAL_POSE, poseForTime, timeToDigits,
+  CLOCK_COUNT, COLS, DIGIT_COLS, DIGIT_ROW, NEUTRAL_POSE, poseForTime, poseForTimeAt, timeToDigits,
 } from '../src/core/layout';
 
 describe('timeToDigits', () => {
@@ -50,5 +50,26 @@ describe('poseForTime', () => {
         expect(pose[(DIGIT_ROW + gr) * COLS + DIGIT_COLS[0] + gc]).toEqual(NEUTRAL);
       }
     }
+  });
+});
+
+describe('poseForTimeAt', () => {
+  it('matches poseForTime at the default origin', () => {
+    expect(poseForTimeAt(12, 34, 2, 3)).toEqual(poseForTime(12, 34));
+    expect(poseForTimeAt(9, 5, 2, 3)).toEqual(poseForTime(9, 5));
+  });
+
+  it('stamps the block at origin (0, 0)', () => {
+    const pose = poseForTimeAt(9, 5, 0, 0);
+    expect(pose[0 * COLS + 5]).toEqual(DIGIT_GLYPHS[9][0]); // slot 1 at block offset 5
+    expect(pose[0 * COLS + 0]).toEqual(NEUTRAL);            // blank leading digit
+    expect(pose[7 * COLS + 0]).toEqual(NEUTRAL);            // below the block
+  });
+
+  it('stamps the block at the extreme origin (4, 6)', () => {
+    const pose = poseForTimeAt(12, 34, 4, 6);
+    expect(pose[6 * COLS + 4]).toEqual(DIGIT_GLYPHS[1][0]);     // slot 0 glyph top-left
+    expect(pose[11 * COLS + 23]).toEqual(DIGIT_GLYPHS[4][23]);  // slot 3 glyph bottom-right
+    expect(pose[5 * COLS + 4]).toEqual(NEUTRAL);                // above the block
   });
 });

@@ -10,6 +10,12 @@ export const DIGIT_COLS = [2, 7, 13, 18] as const;
 /** Grid row where every digit block starts. */
 export const DIGIT_ROW = 3;
 
+/** The full time display: 4 digits + gaps, as one block. */
+export const DIGIT_BLOCK_COLS = 20;
+export const DIGIT_BLOCK_ROWS = 6;
+/** Digit slot column offsets within the block (DIGIT_COLS relative to the block origin). */
+const DIGIT_SLOT_OFFSETS = [0, 5, 11, 16] as const;
+
 const GLYPH_COLS = 4;
 const GLYPH_ROWS = 6;
 
@@ -21,15 +27,26 @@ export function timeToDigits(hours24: number, minutes: number): readonly [number
   return [h12 >= 10 ? 1 : null, h12 % 10, Math.floor(minutes / 10), minutes % 10];
 }
 
-export function poseForTime(hours24: number, minutes: number): GridPose {
+/** Full-grid pose: neutral everywhere, the time block stamped at the given origin. */
+export function poseForTimeAt(
+  hours24: number,
+  minutes: number,
+  originCol: number,
+  originRow: number,
+): GridPose {
   const pose: HandAngles[] = Array.from({ length: CLOCK_COUNT }, () => NEUTRAL);
   timeToDigits(hours24, minutes).forEach((digit, slot) => {
     const glyph = digit === null ? BLANK_GLYPH : DIGIT_GLYPHS[digit];
     for (let gr = 0; gr < GLYPH_ROWS; gr++) {
       for (let gc = 0; gc < GLYPH_COLS; gc++) {
-        pose[(DIGIT_ROW + gr) * COLS + DIGIT_COLS[slot] + gc] = glyph[gr * GLYPH_COLS + gc];
+        pose[(originRow + gr) * COLS + originCol + DIGIT_SLOT_OFFSETS[slot] + gc] =
+          glyph[gr * GLYPH_COLS + gc];
       }
     }
   });
   return pose;
+}
+
+export function poseForTime(hours24: number, minutes: number): GridPose {
+  return poseForTimeAt(hours24, minutes, DIGIT_COLS[0], DIGIT_ROW);
 }
