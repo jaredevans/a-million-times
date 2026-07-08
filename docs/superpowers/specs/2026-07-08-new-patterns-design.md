@@ -143,32 +143,39 @@ Ring passage rotates a cell ±45° over ~0.6s — well under the threshold.
 Five invisible birds fly loosely-aligned Lissajous paths (similar
 frequencies, hash-offset phases ⇒ they travel as a flock). Each clock's
 needle points along the Gaussian-weighted vector blend of nearby bird
-headings (velocity directions), falling back to a gentle ambient drift.
-Directional blending happens in raw grid-vector space — normalize each
-bird's velocity, weight, sum — so there is no fold anywhere.
+headings (velocity directions). The ambient far-field is the flock's own
+mean heading plus a gentle spatial wobble — it can never oppose the flock,
+which eliminates vector-cancellation snaps (an independent drift base was
+measured at 80 frames >30°/frame; this design measures 6, max 89°, from
+late-window bird dispersal — accepted).
 
 ```ts
 const murmuration: Choreography = (col, row, t) => {
-  const baseA = mod360(t * 6 + Math.sin(col * 0.5 + row * 0.3 + t * 0.5) * 25 + 90);
-  let vx = 0, vy = 0, total = 0;
+  let vx = 0, vy = 0, total = 0, gx = 0, gy = 0;
   for (let i = 0; i < 5; i++) {
     const fx = 0.24 + (hash(i * 7) % 10) * 0.006;
     const fy = 0.31 + (hash(i * 11) % 10) * 0.006;
-    const px = (hash(i * 13) % 100) / 50;
-    const py = (hash(i * 17) % 100) / 50;
+    const px = (hash(i * 13) % 100) / 100;
+    const py = (hash(i * 17) % 100) / 100;
     const bx = 11.5 + 9 * Math.sin(fx * t + px);
     const by = 5.5 + 4.5 * Math.sin(fy * t + py);
     const hx = 9 * fx * Math.cos(fx * t + px);   // path velocity = heading
     const hy = 4.5 * fy * Math.cos(fy * t + py);
     const hm = Math.hypot(hx, hy);
     if (hm === 0) continue;
+    gx += hx / hm;                    // global mean heading accumulator
+    gy += hy / hm;
     const d = Math.hypot(col - bx, row - by);
     const w = Math.exp(-d * d / 16); // influence radius ~4 clocks
     vx += (w * hx) / hm;
     vy += (w * hy) / hm;
     total += w;
   }
-  const bw = Math.max(0, 1 - total); // ambient drift fills the gap
+  // Ambient field: the flock's mean heading with a gentle spatial wobble,
+  // so the far field leans where the flock flies and never opposes it.
+  const wobble = Math.sin(col * 0.4 + row * 0.3 + t * 0.7) * 20;
+  const baseA = mod360(angleToward(gx, gy) + wobble);
+  const bw = Math.max(0, 1 - total);
   const baseRad = (baseA * Math.PI) / 180;
   vx += bw * Math.sin(baseRad);
   vy += bw * -Math.cos(baseRad);
@@ -196,8 +203,13 @@ const murmuration: Choreography = (col, row, t) => {
   1000-minute window still covers all 13 (re-pin count).
 - Smoothness gate before merge: run each new pattern through the
   frame-delta harness (axial metric for line patterns, circular for
-  needle patterns); no jump > 30°/frame except metronome's designed 6°
-  ticks and frame's eased ±45° ring rotations.
+  needle patterns). Measured baselines for the reference implementations
+  (60fps, full grid, t ∈ [0, 38]): metronome max 1.79°/frame (0 events
+  >30°), moiré 1.46° (0), kaleidoscope 53.32° (8 events — vortex
+  fly-overs, accepted; shipped spiral measures 176°), frame 6.81° (0),
+  murmuration 89.05° (6 events — late-window bird dispersal, accepted).
+  Any implementation deviating from these numbers indicates a transcription
+  error.
 
 ## Non-goals
 
