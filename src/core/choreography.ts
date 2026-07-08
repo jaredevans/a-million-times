@@ -291,10 +291,12 @@ const kaleidoscope: Choreography = (col, row, t) => {
   const cy = 2.75 + 1.6 * Math.cos(0.55 * t);
   const dx = cx - mx, dy = cy - my;
   const dist = Math.hypot(dx, dy);
-  // Arms coil and uncoil as the twist breathes; spin speed oscillates 15..65 deg/s
-  const twist = 16 + 9 * Math.sin(0.45 * t);
-  const spin = t * 40 + Math.sin(t * 0.35) * 71.4;
-  let a = mod360(angleToward(dx, dy) + 90 + dist * twist + spin);
+  // Arms coil and uncoil deeply, straightening to radial spokes before recoiling
+  const twist = 14 + 14 * Math.sin(0.6 * t);
+  // A ripple radiates through the mandala while the spin oscillates 10..80 deg/s
+  const wave = Math.sin(dist * 1.2 - t * 3) * 25;
+  const spin = t * 45 + Math.sin(t * 0.4) * 87.5;
+  let a = mod360(angleToward(dx, dy) + 90 + dist * twist + wave + spin);
   if (col > 11.5) a = mod360(-a);       // mirror across the vertical axis
   if (row > 5.5) a = mod360(180 - a);   // mirror across the horizontal axis
   return [a, mod360(a + 180)];

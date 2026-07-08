@@ -224,11 +224,12 @@ source of truth:
 - **Moiré:** sources orbit at ~4x speed/amplitude, fringe density breathes
   27–63°/unit (`k = 45 + 18·sin(0.35t)`), sweep oscillates 15–65°/s.
   Measured: max 1.46 → 7.03°/frame, mean 30 → 89°/s, still 0 events >30°.
-- **Kaleidoscope:** twist breathes (`16 + 9·sin(0.45t)`) so arms coil and
-  uncoil, spin oscillates 15–65°/s; vortex orbit kept at original speed
-  (faster orbits tripled fly-over snaps — measured and rejected).
-  Measured: mean → 44°/s (~2.5x), snap profile unchanged (8 events,
-  max 53°). Anchor pins updated in tests accordingly.
+- **Kaleidoscope:** twist breathes deeply (`14 + 14·sin(0.6t)` — arms
+  straighten into radial spokes and recoil), a ripple radiates through the
+  mandala (`sin(dist·1.2 − 3t)·25`), spin oscillates 10–80°/s; vortex orbit
+  kept at original speed (faster orbits tripled fly-over snaps — measured
+  and rejected). Measured: mean → 71°/s (~4x), snap profile unchanged
+  (8 events, max 53°). Anchor pins updated in tests accordingly.
 
 ## Non-goals
 

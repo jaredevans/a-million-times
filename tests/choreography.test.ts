@@ -120,11 +120,11 @@ describe('formula anchors', () => {
 
     // Kaleidoscope: 4-fold mirror. (20,2) is (3,2) mirrored across the vertical
     // axis (angle negated); (3,9) across the horizontal (angle -> 180 - a).
-    expect(kaleidoscope(3, 2, 7)[0]).toBeCloseTo(198.7286, 2);
-    expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(18.7286, 2);
-    expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(161.2714, 2); // 360 - 198.7286
-    expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(341.2714, 2);  // 180 - 198.7286 (mod 360)
-    expect(kaleidoscope(20, 9, 7)[0]).toBeCloseTo(18.7286, 2);  // both mirrors compose to 180 + a
+    expect(kaleidoscope(3, 2, 7)[0]).toBeCloseTo(181.1255, 2);
+    expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(1.1255, 2);
+    expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(178.8745, 2); // 360 - 181.1255
+    expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(358.8745, 2);  // 180 - 181.1255 (mod 360)
+    expect(kaleidoscope(20, 9, 7)[0]).toBeCloseTo(1.1255, 2);   // both mirrors compose to 180 + a
 
     // Frame: at t=0 a ring sits at the center; (11,5) is on a top/bottom edge
     // (rotates toward 90 deg), (23,5) on a side edge (rotates toward 0), both
