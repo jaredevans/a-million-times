@@ -291,7 +291,10 @@ const kaleidoscope: Choreography = (col, row, t) => {
   const cy = 2.75 + 1.6 * Math.cos(0.55 * t);
   const dx = cx - mx, dy = cy - my;
   const dist = Math.hypot(dx, dy);
-  let a = mod360(angleToward(dx, dy) + 90 + dist * 22 + t * 10); // tangent + twist
+  // Arms coil and uncoil as the twist breathes; spin speed oscillates 15..65 deg/s
+  const twist = 16 + 9 * Math.sin(0.45 * t);
+  const spin = t * 40 + Math.sin(t * 0.35) * 71.4;
+  let a = mod360(angleToward(dx, dy) + 90 + dist * twist + spin);
   if (col > 11.5) a = mod360(-a);       // mirror across the vertical axis
   if (row > 5.5) a = mod360(180 - a);   // mirror across the horizontal axis
   return [a, mod360(a + 180)];

@@ -215,6 +215,21 @@ const murmuration: Choreography = (col, row, t) => {
   Any implementation deviating from these numbers indicates a transcription
   error.
 
+## Post-merge tuning (2026-07-08, user feedback: "too dead")
+
+The moiré and kaleidoscope reference implementations above show the original
+constants; both were retuned for liveliness after merge — the code is the
+source of truth:
+
+- **Moiré:** sources orbit at ~4x speed/amplitude, fringe density breathes
+  27–63°/unit (`k = 45 + 18·sin(0.35t)`), sweep oscillates 15–65°/s.
+  Measured: max 1.46 → 7.03°/frame, mean 30 → 89°/s, still 0 events >30°.
+- **Kaleidoscope:** twist breathes (`16 + 9·sin(0.45t)`) so arms coil and
+  uncoil, spin oscillates 15–65°/s; vortex orbit kept at original speed
+  (faster orbits tripled fly-over snaps — measured and rejected).
+  Measured: mean → 44°/s (~2.5x), snap profile unchanged (8 events,
+  max 53°). Anchor pins updated in tests accordingly.
+
 ## Non-goals
 
 - No changes to the existing eight patterns beyond the ripple rename.
