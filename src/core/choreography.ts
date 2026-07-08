@@ -257,9 +257,20 @@ const bubbles: Choreography = (col, row, t) => {
   return [handA, handB];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles];
+/** Every clock ticks like a second hand, staggered so ticks rain across the wall. */
+const metronome: Choreography = (col, row, t) => {
+  // Diagonal cascade with a touch of per-clock jitter (0-0.4s)
+  const phase = (col * 0.13 + row * 0.21 + (hash(col + row * 24) % 100) / 250) % 1;
+  const tp = t + phase;
+  const tick = Math.floor(tp);
+  const p = Math.min(1, (tp - tick) / 0.15); // the snap takes 0.15s
+  const a = mod360((tick + easeInOutCubic(p)) * 6);
+  return [a, a];
+};
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles'];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome];
+
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome'];
 
 let patternOverride: number | null = null;
 

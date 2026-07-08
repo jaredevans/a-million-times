@@ -13,8 +13,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has eight pieces', () => {
-    expect(CATALOG).toHaveLength(8);
+  it('has nine pieces', () => {
+    expect(CATALOG).toHaveLength(9);
   });
 
   it('names every piece', () => {
@@ -70,13 +70,13 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(8);
+    expect(seen.size).toBe(9);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -105,11 +105,15 @@ describe('formula anchors', () => {
     const [bA, bB] = bubbles(0, 0, 0);
     expect(Math.round(bA) % 360).toBe(0);           // smooth vertical background current
     expect(Math.round(bB) % 360).toBe(180);
+
+    // Metronome ticks 6 deg per second; (0,0) has phase 0 (hash(0) = 0)
+    expect(metronome(0, 0, 10)).toEqual([60, 60]);    // resting on tick 10
+    expect(metronome(0, 0, 10.5)).toEqual([66, 66]);  // snap to tick 11 finished
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 8 = 0
-    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 8 = 7
-    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 8 = 1
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 9 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 9 = 7
+    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 9 = 1
   });
 });
