@@ -13,8 +13,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has eleven pieces', () => {
-    expect(CATALOG).toHaveLength(11);
+  it('has twelve pieces', () => {
+    expect(CATALOG).toHaveLength(12);
   });
 
   it('names every piece', () => {
@@ -51,7 +51,7 @@ describe('pickChoreography', () => {
     expect(pickChoreography(0)).toBe(CATALOG[2]);
     expect(pickChoreography(12345)).toBe(CATALOG[2]);
     setPatternOverride(null);
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 10 = 0
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 12 = 0
   });
 
   it('ignores out-of-range or non-integer overrides', () => {
@@ -70,13 +70,13 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(11);
+    expect(seen.size).toBe(12);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -121,11 +121,18 @@ describe('formula anchors', () => {
     expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(146.1804, 2);
     expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(33.8196, 2);  // 360 - 326.1804
     expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(213.8196, 2);  // 180 - 326.1804 (mod 360)
+
+    // Frame: at t=0 a ring sits at the center; (11,5) is on a top/bottom edge
+    // (rotates toward 90 deg), (23,5) on a side edge (rotates toward 0), both
+    // 0.5 from the ring so they share the same blend amount, mirrored about 45.
+    expect(frame(11, 5, 0)[0]).toBeCloseTo(86.8661, 2);
+    expect(frame(11, 5, 0)[1]).toBeCloseTo(266.8661, 2);
+    expect(frame(23, 5, 0)[0]).toBeCloseTo(3.1339, 2);
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 11 = 0
-    expect(pickChoreography(1)).toBe(CATALOG[1]); // hash(1) % 11 = 1
-    expect(pickChoreography(4)).toBe(CATALOG[4]); // hash(4) % 11 = 4
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 12 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[7]); // hash(1) % 12 = 7
+    expect(pickChoreography(4)).toBe(CATALOG[1]); // hash(4) % 12 = 1
   });
 });

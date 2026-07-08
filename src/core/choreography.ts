@@ -292,9 +292,23 @@ const kaleidoscope: Choreography = (col, row, t) => {
   return [a, mod360(a + 180)];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope];
+/** Expanding concentric rectangles: rings sweep outward, aligning cells to the frame edge as they pass. */
+const frame: Choreography = (col, row, t) => {
+  const dx = col - 11.5, dy = row - 5.5;
+  const cheb = Math.max(Math.abs(dx), Math.abs(dy));
+  const edge = Math.abs(dx) > Math.abs(dy) ? 0 : 90;
+  const SPEED = 3.5, GAP = 6; // ring every ~1.7s, ~2 rings visible
+  const m = ((cheb - t * SPEED) % GAP + GAP) % GAP;
+  const ringDist = Math.min(m, GAP - m);
+  const p = easeInOutCubic(Math.exp(-ringDist * ringDist * 1.2));
+  const shortDiff = mod360(edge - 45 + 90) % 180 - 90; // +/-45 by construction
+  const a = mod360(45 + shortDiff * p);
+  return [a, mod360(a + 180)];
+};
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré', 'Kaleidoscope'];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope, frame];
+
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré', 'Kaleidoscope', 'Frame'];
 
 let patternOverride: number | null = null;
 
