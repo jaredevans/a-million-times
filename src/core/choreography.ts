@@ -1,4 +1,4 @@
-import { mod360 } from './angles';
+import { easeInOutCubic, mod360 } from './angles';
 import type { HandAngles } from './types';
 
 /** t = seconds since the choreography clock started at :12 (0 <= t <= 38; the gather freezes t = 38). */
@@ -191,65 +191,69 @@ const bubbles: Choreography = (col, row, t) => {
   // Calm water drifting upwards as the background (vertical lines)
   const baseAngle = mod360(Math.sin(col * 0.8 + t * 1.5) * 15);
   
-  let bestIntensity = 0; // 0 = background, 1 = perfectly on bubble boundary
-  let bestRadial = 0;
-  
+  // Overlapping bubble influences blend as vectors in doubled-angle space:
+  // the hands always form a straight line, so orientation lives mod 180, and
+  // near-opposite tangents from crossing streams reinforce instead of
+  // snapping between winners.
+  let vx = 0;
+  let vy = 0;
+  let strength = 0; // strongest single influence: 0 = background, 1 = on a perimeter
+
   // We simulate 10 continuous bubble streams
   for (let i = 0; i < 10; i++) {
     // Pseudo-random properties for this bubble based on its ID
     const h1 = hash(i * 13);
     const h2 = hash(i * 17);
     const h3 = hash(i * 23);
-    
+
     const speed = 1.5 + (h1 % 20) * 0.1; // 1.5 to 3.4 units per second
     const x = (h2 % 240) / 10;           // x position 0 to 23.9
     const radius = 1.5 + (h3 % 25) / 10; // radius 1.5 to 3.9
-    
-    // Y position loops from bottom (16) to top (-8)
+
+    // Y position loops from below the wall to above it; both endpoints sit
+    // outside even the largest bubble's influence band (radius 3.9 + band
+    // 2.5 < 6.5), so streams never pop in or out while visible.
     const tOffset = (hash(i * 29) % 100);
     const cycleTime = 24 / speed;
     const localT = (t + tOffset) % cycleTime;
-    const y = 16 - (localT * speed);
-    
+    const y = 17.5 - (localT * speed);
+
     const dx = col - x;
     const dy = row - y;
     const distFromCenter = Math.sqrt(dx * dx + dy * dy);
-    
+
     // The "bubble" effect is strongest exactly at the perimeter
     const distFromPerimeter = Math.abs(distFromCenter - radius);
-    
+
     // Smooth, wider interpolation band (2.5) so the lines pivot gracefully from further away
     if (distFromPerimeter < 2.5) {
       // 1.0 exactly on perimeter, fading to 0.0 at 2.5 units away
       const intensity = Math.pow(1 - (distFromPerimeter / 2.5), 2);
-      
-      if (intensity > bestIntensity) {
-        bestIntensity = intensity;
-        bestRadial = angleToward(dx, dy);
-      }
+
+      // Tangents wrap clockwise around the bubble
+      const tangentRad = (angleToward(dx, dy) + 90) * Math.PI / 180;
+      vx += intensity * Math.cos(2 * tangentRad);
+      vy += intensity * Math.sin(2 * tangentRad);
+      if (intensity > strength) strength = intensity;
     }
   }
-  
+
   // Background flow is just straight dashed lines
-  if (bestIntensity === 0) {
+  if (strength === 0) {
     return [baseAngle, mod360(baseAngle + 180)];
   }
-  
-  // Tangents wrap clockwise around the bubble
-  const bestTangent = mod360(bestRadial + 90);
-  
-  const ease = (p: number) => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-  const p = ease(bestIntensity);
-  
-  // Shortest path interpolation prevents wild spinning
-  const diff = mod360(bestTangent - baseAngle);
-  const shortDiff = diff > 180 ? diff - 360 : diff;
-  
+
+  const blendedTangent = mod360(Math.atan2(vy, vx) * 180 / Math.PI / 2);
+  const p = easeInOutCubic(strength);
+
+  // Shortest axial rotation (orientation is mod 180) prevents wild spinning
+  const shortDiff = mod360(blendedTangent - baseAngle + 90) % 180 - 90;
+
   // Mathematical guarantee: the clocks ALWAYS form perfectly straight lines.
   // Because they are exactly 180 degrees apart, they can never form V-shapes (crab legs).
   const handA = mod360(baseAngle + shortDiff * p);
   const handB = mod360(handA + 180);
-  
+
   return [handA, handB];
 };
 
