@@ -331,15 +331,20 @@ const frame: Choreography = (col, row, t) => {
   const flow = (c: number, r: number): number => {
     const dx = c - 11.5, dy = r - 5.5;
     const cheb = Math.max(Math.abs(dx), Math.abs(dy));
-    // Rectangle-edge tangent (0 on side flanks, 90 top/bottom), blended over a
-    // ~0.9-unit wedge at the diagonals so the field has rounded corners and no
-    // spatial jump for the bent hands to trip on
-    const u = Math.max(-1, Math.min(1, (Math.abs(dx) - Math.abs(dy)) / 0.9));
-    const edge = 45 - 45 * u;
+    // Outward normal of the rounded rectangle through this cell, blended over
+    // a ~0.9-unit wedge at the diagonals; its tangent circulates clockwise, so
+    // every corner closes with the correct diagonal (45 at top-left and
+    // bottom-right, 135 at top-right and bottom-left)
+    const w = (Math.max(-1, Math.min(1, (Math.abs(dx) - Math.abs(dy)) / 0.9)) + 1) / 2;
+    const tangent = angleToward(Math.sign(dx) * w, Math.sign(dy) * (1 - w)) + 90;
     const m = ((cheb - t * SPEED) % GAP + GAP) % GAP;
     const ringDist = Math.min(m, GAP - m);
-    const p = easeInOutCubic(Math.exp(-ringDist * ringDist * 1.2));
-    return mod360(45 + (edge - 45) * p);
+    // The contour is the resting state; a wave packet rolls outward with each
+    // ring, tilting hands into the crest and back through the contour, so the
+    // rectangles stay closed at every moment
+    const packet = Math.exp(-ringDist * ringDist * 0.35);
+    const tilt = Math.sin((cheb - t * SPEED) * (Math.PI * 2 / GAP)) * 55 * packet;
+    return mod360(tangent + tilt);
   };
 
   // Hand B re-samples the field a step back along the stroke, so clocks at

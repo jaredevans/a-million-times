@@ -244,6 +244,18 @@ the field spatially continuous. Measured (both-hand metric): moiré max
 — in family with the user's spiral (41) and ripple (48) by the same
 metric. Hand-A formulas unchanged; hand-B anchors re-pinned.
 
+**Frame redesign (user feedback: corners open):** the original blend gave
+all four corners the same 45° diagonal, so two corners bridged with the
+wrong orientation and the boxes read as open. Blending from a uniform rest
+toward any corner-correct tangent field necessarily folds somewhere (the
+tangent winds around the loop), so the blend was dropped entirely: the
+resting field IS the directed contour tangent (outward-normal of the
+rounded rectangle, rotated 90° — closed rectangles with correct diagonals
+at all four corners, at all times), and rings are wave packets
+(`sin((cheb − t·SPEED)·2π/GAP) · 55 · exp(−ringDist²·0.35)`) that tilt
+hands through the contour as they roll outward. Measured: max 8.9°/frame
+both hands, mean 101°/s, 0 events >30°. Corners verified closed in-browser.
+
 ## Non-goals
 
 - No changes to the existing eight patterns beyond the ripple rename.

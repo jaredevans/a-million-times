@@ -126,12 +126,12 @@ describe('formula anchors', () => {
     expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(358.8745, 2);  // 180 - 181.1255 (mod 360)
     expect(kaleidoscope(20, 9, 7)[0]).toBeCloseTo(1.1255, 2);   // both mirrors compose to 180 + a
 
-    // Frame: (11,5) sits exactly on the center diagonal, where the rounded
-    // corner blends the edge tangent to 45 (hand A stays diagonal; hand B
-    // bends around the corner); (23,5) is on a side edge, 0.5 from a ring.
-    expect(frame(11, 5, 0)[0]).toBeCloseTo(45, 2);
-    expect(frame(11, 5, 0)[1]).toBeCloseTo(221.9823, 2);
-    expect(frame(23, 5, 0)[0]).toBeCloseTo(3.1339, 2);
+    // Frame: the resting field IS the closed-rectangle contour; wave packets
+    // tilt hands through it as rings pass. (11,5) sits on the center diagonal
+    // (contour 45 + crest tilt); (23,5) is on a side edge half a unit out.
+    expect(frame(11, 5, 0)[0]).toBeCloseTo(70.196, 2);
+    expect(frame(11, 5, 0)[1]).toBeCloseTo(210.6977, 2);
+    expect(frame(23, 5, 0)[0]).toBeCloseTo(154.804, 2);
 
     // Murmuration: needles follow the flock's blended heading
     expect(murmuration(12, 6, 3)[0]).toBeCloseTo(125.5828, 2);
