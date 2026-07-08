@@ -45,3 +45,21 @@ describe('pickChoreography', () => {
     expect(seen.size).toBe(5);
   });
 });
+
+describe('formula anchors', () => {
+  it('pins each piece to exact known values', () => {
+    const [wave, unison, scissors, bloom, cascade] = CATALOG;
+    expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
+    expect(unison(0, 0, 1)).toEqual([12, 192]);     // t * 12, opposed hands
+    expect(scissors(0, 0, 1)).toEqual([120, 60]);   // 90 +/- t * 30
+    expect(bloom(11, 9, 0)).toEqual([90, 270]);     // attractor at (11.5, 9) is due east
+    expect(cascade(0, 5, 0)).toEqual([180, 180]);   // row not yet started
+    expect(cascade(0, 0, 1)).toEqual([220, 220]);   // 180 + t * 40
+  });
+
+  it('pins the hash-to-piece mapping', () => {
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) = 0
+    expect(pickChoreography(1)).toBe(CATALOG[0]); // hash(1) % 5 = 0
+    expect(pickChoreography(7)).toBe(CATALOG[3]); // hash(7) % 5 = 3
+  });
+});

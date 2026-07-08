@@ -1,7 +1,7 @@
 import { mod360 } from './angles';
 import type { HandAngles } from './types';
 
-/** t = seconds since the choreography clock started at :12 (0 <= t < 38). */
+/** t = seconds since the choreography clock started at :12 (0 <= t <= 38; the gather freezes t = 38). */
 export type Choreography = (col: number, row: number, t: number) => HandAngles;
 
 /** Grid-space direction (x right, y down) to hand angle (0 = up, clockwise). */
@@ -9,7 +9,7 @@ export function angleToward(dx: number, dy: number): number {
   return mod360(90 - (Math.atan2(-dy, dx) * 180) / Math.PI);
 }
 
-/** lowbias32-style integer hash, pinned by the spec. */
+/** Integer hash (Mueller hash32 variant, constant 0x45d9f3b), pinned by the spec. */
 export function hash(n: number): number {
   let h = n >>> 0;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
