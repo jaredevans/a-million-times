@@ -278,9 +278,23 @@ const moire: Choreography = (col, row, t) => {
   return [a, mod360(a + 180)];
 };
 
-export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire];
+/** A vortex orbiting one quadrant, mirrored 4-fold into true kaleidoscope symmetry. */
+const kaleidoscope: Choreography = (col, row, t) => {
+  const mx = col <= 11.5 ? col : 23 - col;
+  const my = row <= 5.5 ? row : 11 - row;
+  const cx = 5.75 + 3 * Math.sin(0.4 * t);   // vortex orbits inside the quadrant
+  const cy = 2.75 + 1.6 * Math.cos(0.55 * t);
+  const dx = cx - mx, dy = cy - my;
+  const dist = Math.hypot(dx, dy);
+  let a = mod360(angleToward(dx, dy) + 90 + dist * 22 + t * 10); // tangent + twist
+  if (col > 11.5) a = mod360(-a);       // mirror across the vertical axis
+  if (row > 5.5) a = mod360(180 - a);   // mirror across the horizontal axis
+  return [a, mod360(a + 180)];
+};
 
-export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré'];
+export const CATALOG: readonly Choreography[] = [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope];
+
+export const PATTERN_NAMES: readonly string[] = ['Wave', 'Spiral', 'Grass', 'Bloom', 'Cascade', 'Ripple', 'Earthquake', 'Bubbles', 'Metronome', 'Moiré', 'Kaleidoscope'];
 
 let patternOverride: number | null = null;
 

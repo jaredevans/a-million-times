@@ -13,8 +13,8 @@ describe('angleToward', () => {
 });
 
 describe('catalog', () => {
-  it('has ten pieces', () => {
-    expect(CATALOG).toHaveLength(10);
+  it('has eleven pieces', () => {
+    expect(CATALOG).toHaveLength(11);
   });
 
   it('names every piece', () => {
@@ -70,13 +70,13 @@ describe('pickChoreography', () => {
   it('plays every piece within a window of consecutive minutes', () => {
     const seen = new Set<unknown>();
     for (let m = 0; m < 1000; m++) seen.add(pickChoreography(m));
-    expect(seen.size).toBe(10);
+    expect(seen.size).toBe(11);
   });
 });
 
 describe('formula anchors', () => {
   it('pins each piece to exact known values', () => {
-    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire] = CATALOG;
+    const [wave, spiral, grass, bloom, cascade, ripple, earthquake, bubbles, metronome, moire, kaleidoscope] = CATALOG;
     expect(wave(1, 0, 0)).toEqual([18, 18]);        // (col + row/2) * 18
     // Spiral hands bend to follow the curve (203° apart here, not 180°)
     const [sA, sB] = spiral(11, 9, 0);
@@ -114,11 +114,18 @@ describe('formula anchors', () => {
     expect(moire(0, 0, 0)[0]).toBeCloseTo(306.4857, 2);
     expect(moire(0, 0, 0)[1]).toBeCloseTo(126.4857, 2);
     expect(moire(20, 3, 5)[0]).toBeCloseTo(309.9527, 2);
+
+    // Kaleidoscope: 4-fold mirror. (20,2) is (3,2) mirrored across the vertical
+    // axis (angle negated); (3,9) across the horizontal (angle -> 180 - a).
+    expect(kaleidoscope(3, 2, 7)[0]).toBeCloseTo(326.1804, 2);
+    expect(kaleidoscope(3, 2, 7)[1]).toBeCloseTo(146.1804, 2);
+    expect(kaleidoscope(20, 2, 7)[0]).toBeCloseTo(33.8196, 2);  // 360 - 326.1804
+    expect(kaleidoscope(3, 9, 7)[0]).toBeCloseTo(213.8196, 2);  // 180 - 326.1804 (mod 360)
   });
 
   it('pins the hash-to-piece mapping', () => {
-    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 10 = 0
-    expect(pickChoreography(1)).toBe(CATALOG[5]); // hash(1) % 10 = 5
-    expect(pickChoreography(4)).toBe(CATALOG[5]); // hash(4) % 10 = 5
+    expect(pickChoreography(0)).toBe(CATALOG[0]); // hash(0) % 11 = 0
+    expect(pickChoreography(1)).toBe(CATALOG[1]); // hash(1) % 11 = 1
+    expect(pickChoreography(4)).toBe(CATALOG[4]); // hash(4) % 11 = 4
   });
 });
